@@ -1,7 +1,7 @@
 NAME1=Lab1A
 NAME2=Lab1C
 
-all: $(NAME1).exe $(NAME2).exe 
+all: $(NAME1).exe $(NAME2).exe
 
 $(NAME1).exe: $(NAME1).obj
 	tlink /v $(NAME1)
@@ -15,3 +15,9 @@ $(NAME2).exe: $(NAME2).obj
 
 $(NAME2).obj: $(NAME2).asm
 	tasm /zi $(NAME2).asm,, $(NAME2).lst
+
+clean:
+	del *.exe
+	del *.obj
+	del *.lst 
+	del *.map
