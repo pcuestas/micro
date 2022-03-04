@@ -1,8 +1,6 @@
-NAME=Lab1A
-all: $(NAME).exe 
+EXE=report1b
 
-$(NAME).exe: $(NAME).obj
-	tlink /v $(NAME)
+all: $(EXE)
 
-$(NAME).obj: $(NAME).asm
-	tasm /zi $(NAME).asm,, $(NAME).lst
+$(EXE): 
+	pandoc $@.md -o $@.pdf
