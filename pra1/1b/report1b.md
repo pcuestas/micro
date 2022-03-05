@@ -10,7 +10,7 @@ header-includes: |
     \usepackage{mathpazo}
 ---
 
-# MICRO. Assignment 1, Task2.
+# MICRO. Assignment 1, Task 2.
 
 Register values (my ID card starts with digits 54): 
 
