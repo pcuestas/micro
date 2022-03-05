@@ -1,54 +1,62 @@
+;**************************************************************************
 ; Lab1C.asm file
-; AUTHOR: PABLO CUESTA SIERRA. GROUP: 2292.
-
-; DATA SEGMENT
-DATA SEGMENT 
+; AUTHOR: PABLO CUESTA SIERRA
+; GROUP: 2292
+;**************************************************************************
+; DATA SEGMENT DEFINITION
+DATA SEGMENT
     LONGLIVE_MBS        DB ?
     DRINK               DW 0CAFEH
     TABLE300            DB 300 DUP(?)
     TOTALERROR2         DB "This programme always crashes"
-DATA ENDS 
+DATA ENDS
+;**************************************************************************
+; STACK SEGMENT DEFINITION
+STACKSEG SEGMENT STACK "STACK"
+    DB 40H DUP (0) 
+STACKSEG ENDS
+;**************************************************************************
+; EXTRA SEGMENT DEFINITION
+EXTRA SEGMENT
+    
+EXTRA ENDS
+;**************************************************************************
 
-; STACK SEGMENT
-PILA    SEGMENT STACK "STACK" 
-    DB   100H DUP (0) 
-PILA ENDS 
-
-; CODE SEGMENT
-CODE    SEGMENT 
-    ASSUME CS:CODE, DS:DATA, SS:PILA 
-
-MAIN PROC 
-    ;INIT SEG REGISTERS 
-    MOV AX, DATA 
-    MOV DS, AX 
-    MOV AX, PILA 
-    MOV SS, AX 
-    ; STACK POINTER 
-    MOV SP, 100H 
-
-    ;START PROGRAM 
-
-; Copy the third character of the string TOTALERROR2 
-; in the position 63H of TABLE300.
+; CODE SEGMENT DEFINITION
+CODE SEGMENT
+ASSUME CS: CODE, DS: DATA, ES: EXTRA, SS: STACKSEG
+; BEGINNING OF MAIN PROCEDURE
+BEGIN PROC
+; INITIALIZE THE SEGMENT REGISTER WITH ITS VALUE
+    MOV AX, DATA
+    MOV DS, AX
+    MOV AX, STACKSEG
+    MOV SS, AX
+    MOV AX, EXTRA
+    MOV ES, AX
+    MOV SP, 64 ; LOAD A STACK POINTER WITH THE HIGHEST VALUE
+; END OF INITIALIZATIONS
+; BEGINNING OF THE PROGRAMME
+    
+    ; Copy the third character of the string TOTALERROR2 
+    ; in the position 63H of TABLE300.
     MOV AL, TOTALERROR2[2]
     MOV TABLE300[63H], AL
 
-; Copy the content of the variable DRINK starting in 
-; the position 4 of TABLE300.
+    ; Copy the content of the variable DRINK starting in 
+    ; the position 4 of TABLE300.
     MOV AX, DRINK
     MOV WORD PTR TABLE300[4], AX
 
-; Copy the most significant byte of DRINK in the 
-; variable LONGLIVE_MBS. 
+    ; Copy the most significant byte of DRINK in the 
+    ; variable LONGLIVE_MBS. 
     MOV LONGLIVE_MBS, AH
-
-    ; END PROGRAM 
-    MOV AX, 4C00H 
-    INT 21H 
-
-MAIN ENDP 
-
-CODE ENDS 
-
-END MAIN 
+    
+; END OF THE PROGRAMME
+    MOV AX, 4C00H
+    INT 21H
+BEGIN ENDP
+; END OF THE CODE SEGMENT
+CODE ENDS
+; END OF THE PROGRAMME POINTING OUT WHERE THE EXECUTION BEGINS
+END BEGIN 
