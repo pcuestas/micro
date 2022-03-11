@@ -1,0 +1,153 @@
+;**************************************************************************
+; Lab1A.asm file
+; AUTHOR: PABLO CUESTA SIERRA
+; GROUP: 2292
+;**************************************************************************
+; DATA SEGMENT DEFINITION
+
+    MATRIX_SIZE EQU 3
+
+DATA SEGMENT
+    A DB  1, 2, 3
+      DB  4, 5, 6
+      DB  7, 8, 9 ; INITIAL MATRIX
+DATA ENDS
+;**************************************************************************
+; STACK SEGMENT DEFINITION
+STACKSEG SEGMENT STACK "STACK"
+    DB 40H DUP (0)
+STACKSEG ENDS
+;**************************************************************************
+; EXTRA SEGMENT DEFINITION
+EXTRA SEGMENT
+    DIVISOR     DB  3
+    CLR_SCREEN  DB 	1BH,"[2","J$"
+	TITLE_   	DB 	1BH,"[4;27f MATRIX DETERMINANT$"
+    SELECT_MSG  DB  1BH,"[8;1f Select option:$"
+    OPT1_MSG    DB  18H,"[9;1f 1) CALCULATE THE DETERMINANT USING DEFAULT VALUES$"
+    OPT2_MSG    DB  18H,"[10;1f 1) CALCULATE THE DETERMINANT BY TYPING NEW VALUES$"
+EXTRA ENDS
+;**************************************************************************
+; CODE SEGMENT DEFINITION
+CODE SEGMENT
+ASSUME CS: CODE, DS: DATA, ES: EXTRA, SS: STACKSEG
+; BEGINNING OF MAIN PROCEDURE
+BEGIN PROC
+; INITIALIZE THE SEGMENT REGISTER WITH ITS VALUE
+    MOV AX, DATA
+    MOV DS, AX
+    MOV AX, STACKSEG
+    MOV SS, AX
+    MOV AX, EXTRA
+    MOV ES, AX
+    MOV SP, 64 ; LOAD A STACK POINTER WITH THE HIGHEST VALUE
+; END OF INITIALIZATIONS
+; BEGINNING OF THE PROGRAMME
+    MOV AH,9	                ; CLEAR SCREEN
+	MOV DX, OFFSET CLR_SCREEN
+	INT 21H
+	
+	MOV DX,OFFSET TITLE_
+	INT 21H
+	MOV DX,OFFSET SELECT_MSG
+	INT 21H
+	MOV DX,OFFSET OPT1_MSG
+	INT 21H
+	MOV DX,OFFSET OPT2_MSG
+	INT 21H
+    ;  --------------------------HERE GOES QUESTIONS TO USER ABOUT DATA
+    
+    MOV CX, 0
+    MOV DX, 0 ; TOTAL RESULT
+ITER1:
+    MOV AX, 0
+
+    MOV BX, 0
+    MOV SI, CX 
+    MOV AL, A[BX][SI]
+    PUSH AX 
+
+    ADD BX, MATRIX_SIZE  
+    INC SI 
+    MOV AX, SI 
+    DIV DIVISOR ; aH = ax % 3
+    MOV AL, AH
+    MOV AH, 0
+    MOV SI, AX    
+    MOV AL, A[BX][SI]
+    PUSH AX 
+    
+    ADD BX, MATRIX_SIZE 
+    INC SI 
+    MOV AX, SI 
+    DIV DIVISOR ; aH = ax % 3
+    MOV AL, AH
+    MOV AH, 0
+    MOV SI, AX    
+    MOV AL, A[BX][SI]
+    
+    POP BX ; NOW AX, BX, SI CONTAIN THE THREE VALUES TO BE MULTIPLIED
+    POP SI
+    CALL MULT3 ;MULTIPLY
+
+    ADD DX, AX ; ADD MULTIPLICATION TO DX
+
+    INC CX 
+    CMP CX, MATRIX_SIZE
+    JNE ITER1
+
+; SECOND PART OF THE MATRIX MULTIPLICATION
+    MOV CX, 0
+ITER2:
+    MOV AX, 0
+
+    MOV BX, 0
+    MOV SI, 2
+    SUB SI, CX 
+    MOV AL, A[BX][SI]
+    PUSH AX 
+
+    ADD BX, MATRIX_SIZE  
+    ADD SI, 2 
+    MOV AX, SI 
+    DIV DIVISOR ; aH = ax % 3
+    MOV AL, AH
+    MOV AH, 0
+    MOV SI, AX    
+    MOV AL, A[BX][SI]
+    PUSH AX 
+    
+    ADD BX, MATRIX_SIZE 
+    ADD SI, 2 
+    MOV AX, SI 
+    DIV DIVISOR ; aH = ax % 3
+    MOV AL, AH
+    MOV AH, 0
+    MOV SI, AX    
+    MOV AL, A[BX][SI]
+    
+    POP BX ; NOW AX, BX, SI CONTAIN THE THREE VALUES TO BE MULTIPLIED
+    POP SI
+    CALL MULT3 ;MULTIPLY
+
+    SUB DX, AX ; SUBTRACT MULTIPLICATION FROM DX
+
+    INC CX 
+    CMP CX, MATRIX_SIZE
+    JNE ITER2
+
+; END OF THE PROGRAMME
+    MOV AX, 4C00H
+    INT 21H
+BEGIN ENDP
+
+MULT3 PROC 
+    IMUL SI 
+    IMUL BX 
+    RET
+MULT3 ENDP
+
+; END OF THE CODE SEGMENT
+CODE ENDS
+; END OF THE PROGRAMME POINTING OUT WHERE THE EXECUTION BEGINS
+END BEGIN
