@@ -9,14 +9,19 @@
 
 DATA SEGMENT
     DIVISOR     DB  3
+    BASE_10     DB  10
     CLR_SCREEN  DB 	1BH,"[2","J$"
-	TITLE_   	DB 	1BH,"[4;27f MATRIX DETERMINANT$"
-    SELECT_MSG  DB  1BH,"[8;1f Select option:$"
-    OPT1_MSG    DB  18H,"[9;1f 1) CALCULATE THE DETERMINANT USING DEFAULT VALUES$"
-    OPT2_MSG    DB  18H,"[10;1f 1) CALCULATE THE DETERMINANT BY TYPING NEW VALUES$"
-    A           DB  1, -2, 3
-                DB  4, -5, 6
-                DB  7, 8, 32 ; INITIAL MATRIX
+	TITLE_   	DB 	1BH,"[4;27f MATRIX DETERMINANT",13,10,'$'
+    SELECT_MSG  DB  "Select option:",13,10,'$'
+    OPT1_MSG    DB  "1) CALCULATE THE DETERMINANT USING DEFAULT VALUES",13,10,'$'
+    OPT2_MSG    DB  "2) CALCULATE THE DETERMINANT BY TYPING NEW VALUES",13,10,'$'
+    
+    AUX_RES     DB 20 DUP(?)
+    ASCII_RES   DB 20 DUP(?)
+     
+    A           DB  -1, -2, 3
+                DB  -4, -5, 6
+                DB  -7, 8, 32 ; INITIAL MATRIX
     ORG 200H
     B           DW  ? ; DETERMINANT RESULT 
 DATA ENDS
@@ -28,6 +33,7 @@ STACKSEG ENDS
 ;**************************************************************************
 ; EXTRA SEGMENT DEFINITION
 EXTRA SEGMENT
+
 EXTRA ENDS
 ;**************************************************************************
 ; CODE SEGMENT DEFINITION
@@ -60,11 +66,50 @@ BEGIN PROC
     ;  --------------------------HERE GOES QUESTIONS TO USER ABOUT DATA
     
     CALL CALCULATE_DETERMINANT
+    
+    MOV BX, B 
+    CALL ASCII_BX 
+    MOV DX, AX 
+    MOV AH, 9H
+    INT 21H
 
 ; END OF THE PROGRAMME
     MOV AX, 4C00H
     INT 21H
 BEGIN ENDP
+
+ASCII_BX PROC 
+    MOV SI, 0
+    MOV DI, 0
+    MOV AX, BX
+    TEST AX, 8000H ; CHECK SIGN OF AX
+    JZ CONVERT     ; JUMP IF AX POSITIVE
+    NEG AX 
+    MOV ASCII_RES[SI], '-'
+    INC SI 
+CONVERT:
+    DIV BASE_10 ; AH=AX%10, AL=AX/10
+    ADD AH, '0'
+    MOV AUX_RES[DI], AH
+    INC DI 
+    MOV AH, 0
+    CMP AX, 0
+    JNE CONVERT 
+    
+INVERT_RES:
+    DEC DI
+    MOV AL, AUX_RES[DI]
+    MOV ASCII_RES[SI], AL
+    INC SI 
+    CMP DI,0
+    JNE INVERT_RES
+     
+    MOV ASCII_RES[SI],'$' ;END OF STRING 
+     
+    MOV AX, OFFSET ASCII_RES
+    MOV DX, SEG ASCII_RES 
+    RET 
+ASCII_BX ENDP 
 
 ; EXTEND THE SIGN OF AX (8 BITS TO 16 BITS)
 EXTEND_AX_SIGN PROC
