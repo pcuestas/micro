@@ -14,8 +14,50 @@ _TEXT SEGMENT BYTE PUBLIC 'CODE' ; Definition of the code segment
 
 PUBLIC _SubstringFinder 
 PUBLIC _strcmp2 
+PUBLIC _SecondComputDC
+EXTRN _strlen:FAR
 
 
+_SecondComputDC PROC FAR ; unsigned int SecondComputDC (char* numCuenta)
+    push bp 
+    mov bp, sp 
+
+    push bx si ds di dx
+
+    lds bx, [bp + 6]
+    push ds bx 
+    call _strlen 
+    add sp, 4
+    cmp ax, 10 ; if there are not 10 digits, return -1
+    jne second_compute_fail
+    mov si, 9
+    mov di, 0               ; di == sum = 0 
+    second_compute_loop:
+        shl di, 1 ; sum *= 2  
+        mov ah, 0 
+        mov al, [bx][si]
+        sub ax, '0'
+        add di, ax ; sum += next_digit
+        dec si 
+        jns second_compute_loop 
+
+    mov dx, 0
+    mov ax, di 
+    mov si, 11
+    div si          ; dx = sum%11
+    sub si, dx      ; si = 11-sum%11
+    mov ax, si
+    cmp ax, 10 
+    jne second_compute_end
+        mov ax, 1
+    jmp second_compute_end
+    second_compute_fail:
+        mov ax, -1 
+    second_compute_end:
+    pop dx di ds si bx
+    pop bp 
+    ret 
+_SecondComputDC ENDP
 
 ; this function checks if str1 is exactly the beginning of str2 
 ; strcmp2("asd", "asdasdfdf") returns 1
@@ -81,7 +123,6 @@ _SubstringFinder PROC FAR ;  int SubstringFinder (char* str, char* substr)
         inc si 
         jmp check_letter
 
-
     found:
         mov ax, si 
         jmp end_finder
@@ -90,8 +131,7 @@ _SubstringFinder PROC FAR ;  int SubstringFinder (char* str, char* substr)
         mov ax, -1
     
     end_finder:
-        pop di si bx es ds
-
+    pop di si bx es ds
     pop bp 
     ret 
 _SubstringFinder ENDP

@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 
 #define BUFLEN 1024
 
@@ -7,6 +8,7 @@ extern int DigitComputation(unsigned int , unsigned int );
 extern unsigned int NextPrime(unsigned int);
 extern int SubstringFinder(char*, char*);
 extern int strcmp2(char*, char*);
+extern unsigned int SecondComputDC (char*);
 
 void check_OddPositive()
 {
@@ -65,18 +67,29 @@ void check_SubstringFinder()
     printf("The output is %d.\n\n", ret);
 }
 
-void SecondComputDC()
+void check_SecondComputDC()
 {
+    unsigned int ret;
+    char str[BUFLEN];
+    printf("Check SecondComputDC...\n");
 
+    printf("Input a 10 digit number: ");
+    scanf("%s",str);
+    ret = SecondComputDC(str);
+    printf("Second control digit: %u\n", ret);    
 }
 
 int main()
 {
     int option;
+
     printf("Options:\n" \
-         "\t1) OddPositive\n\t2) DigitComputation\n\t3) NextPrime\n"\
-         "\t4) SubstringFinder\n\t5) SecondComputDC"\
-         "Select an option: ");
+            "\t1) OddPositive\n"\
+            "\t2) DigitComputation\n"\
+            "\t3) NextPrime\n"\
+            "\t4) SubstringFinder\n"\
+            "\t5) SecondComputDC\n"\
+        "Select an option: ");
     scanf("%d", &option);
 
     switch(option)
