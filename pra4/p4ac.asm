@@ -1,4 +1,4 @@
-INTERR_ADDR EQU 57h
+INTERR_ADDR EQU 1Ch ; periodic interruption 
 ROW_LEN EQU 6 
 
 code SEGMENT
@@ -29,85 +29,26 @@ code SEGMENT
         int 21h 
 
         mov ah, 9h
-        mov dx, OFFSET POLYBIUS
+        mov dx, OFFSET INFO
         int 21h
 
         mov ax, 4C00h
         int 21h 
 
     ; variables
-    POLYBIUS DB "Driver info.",13,10,"$"
+    INFO DB "Periodic interrupt sevice routine for inerrupt 1Ch.",13,10
+         DB "Install using argument /I. Uninstall using argument /D.",13,10,"$"
     INSTALLED_MSG DB "Driver already installed",13,10,"$"
     NOT_INSTALLED_MSG DB "Driver not installed",13,10,"$"
     INSTALLED DB "INSTALLED", 13, 10, "$"
     NOT_INSTALLED DB "NOT INSTALLED", 13, 10, "$"
+
+    timer_tick db 0 
+
     signature db "k"
 
     isr PROC FAR
-        push ax bx cx dx 
-        
-        mov bx, dx 
-        mov cx, ROW_LEN
-
-        cmp ah, 10h
-        je codification 
-        ; decodification 
-        cmp byte ptr [bx], '$'
-        je end_FUNCT 
-            decodification_loop:
-                mov dx, [bx]
-                add dl, -1-'0' 
-                add dh, -1-'0'
-                mov al, dl 
-                mul cl     
-                add al, dh 
-                cmp al, 'Z'-'A'
-                jg decodification_number 
-                ; letter 
-                    add al, 'A'
-                    jmp decodification_print
-                decodification_number:
-                    sub al, 'Z'-'A'+1-'0'
-                decodification_print:
-                    call print_char            
-                cmp byte ptr [bx+2], '$'
-                je end_FUNCT
-                add bx, 3
-                jmp decodification_loop            
-
-        codification:
-            codification_loop:
-                mov al, [bx]
-                cmp al, '$'
-                je end_FUNCT
-                cmp al, 'A'
-                jge codification_letter 
-                    ; it is a number 
-                    add al, 'Z'-'A'+1-'0'
-                    jmp codification_operation
-                codification_letter:
-                    sub al, 'A'    
-                codification_operation:
-                    mov ah, 0 
-                    div cl ; ax /= 6
-                    add al, 1+'0'
-                    call print_char  
-                    add ah, 1+'0'
-                    mov al, ah 
-                    call print_char
-                    mov al, ' '
-                    call print_char
-                    inc bx 
-                    jmp codification_loop
-
-        end_FUNCT:
-        
-        mov al, 13 
-        call print_char
-        mov al, 10 
-        call print_char 
-
-        pop dx cx bx ax 
+        inc timer_tick
         iret 
     isr ENDP 
 
@@ -167,7 +108,7 @@ code SEGMENT
         ret
     uninstaller ENDP 
 
-    installer PROC
+    installer PROC 
         mov ax, 0 
         mov es, ax 
         mov ax, OFFSET isr 
