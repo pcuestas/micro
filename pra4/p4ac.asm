@@ -86,7 +86,8 @@ code SEGMENT
         mov bx, ds:[ INTERR_ADDR*4 ]
         cmp byte ptr es:[bx-1], "k"
         jne not_installed_uninstaller
-        mov bx, es:[ 2Ch ] ; Read segment of environment from ISR’s PSP. mov ah, 49h
+        mov bx, es:[ 2Ch ] ; Read segment of environment from ISR’s PSP. 
+        mov ah, 49h
         int 21h ; Release ISR segment (es)
         mov es, bx
         int 21h ; Release segment of environment variables of ISR; Set vector of interrupt 40h to zero
