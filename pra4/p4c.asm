@@ -49,7 +49,7 @@ CODE SEGMENT
         jb iter 
             ; disable timer interrupts 
                 in al, 21h ; read master IMR 
-                and al, 01111111b 
+                and al, 11111110b 
                 out 12h, al ; write new mask
 
             mov BYTE PTR es:[bx-2], 0
@@ -64,7 +64,7 @@ CODE SEGMENT
             nothing_read:
             ;enable timer interrupts 
                 in al, 21h ; read master IMR 
-                or al, 10000000b 
+                or al, 00000001b 
                 out 12h, al ; write new mask
             
             dec cx
